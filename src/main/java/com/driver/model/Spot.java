@@ -17,7 +17,7 @@ public class Spot {
     private int pricePerHour;
 
     @Column(columnDefinition = "TINYINT(1)")
-    private boolean occupied;
+    private Boolean occupied;
 
     @ManyToOne
     @JoinColumn
@@ -33,6 +33,7 @@ public class Spot {
     }
 
     public Spot() {
+        this.occupied = false;
     }
 
     public int getId() {
@@ -59,11 +60,11 @@ public class Spot {
         this.pricePerHour = pricePerHour;
     }
 
-    public boolean isOccupied() {
+    public Boolean getOccupied() {
         return occupied;
     }
 
-    public void setOccupied(boolean occupied) {
+    public void setOccupied(Boolean occupied) {
         this.occupied = occupied;
     }
 

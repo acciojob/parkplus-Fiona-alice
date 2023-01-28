@@ -8,7 +8,8 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private boolean paymentCompleted;
+    @Column(columnDefinition =  "TINYINT(1)")
+    private Boolean paymentCompleted;
 
     @Enumerated(value = EnumType.STRING)
     private PaymentMode paymentMode;
@@ -16,11 +17,6 @@ public class Payment {
     @OneToOne
     @JoinColumn
     private Reservation reservation;
-
-    public Payment(boolean paymentCompleted, PaymentMode paymentMode) {
-        this.paymentCompleted = paymentCompleted;
-        this.paymentMode = paymentMode;
-    }
 
     public int getId() {
         return id;
@@ -30,11 +26,11 @@ public class Payment {
         this.id = id;
     }
 
-    public boolean isPaymentCompleted() {
+    public Boolean getPaymentCompleted() {
         return paymentCompleted;
     }
 
-    public void setPaymentCompleted(boolean paymentCompleted) {
+    public void setPaymentCompleted(Boolean paymentCompleted) {
         this.paymentCompleted = paymentCompleted;
     }
 
