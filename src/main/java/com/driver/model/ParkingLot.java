@@ -16,15 +16,17 @@ public class ParkingLot {
     @OneToMany(mappedBy = "parkingLot",cascade = CascadeType.ALL)
     private List<Spot> spotList = new ArrayList<>();
 
-    public int getId() {
-        return id;
-    }
-
     public ParkingLot(String name, String address) {
         this.name = name;
         this.address = address;
     }
 
+    public ParkingLot() {
+    }
+
+    public int getId() {
+        return id;
+    }
     public void setId(int id) {
         this.id = id;
     }
