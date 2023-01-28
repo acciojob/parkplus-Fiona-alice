@@ -7,22 +7,31 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int i;
+    private int id;
 
     private String name;
     private String phoneNumber;
     private String password;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "User", cascade = CascadeType.ALL)
     @JoinColumn
-    List<Reservation> reservationList;
+    private List<Reservation> reservationList;
 
-    public int getI() {
-        return i;
+    public User(String name, String phoneNumber, String password) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.password = password;
     }
 
-    public void setI(int i) {
-        this.i = i;
+    public User() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int i) {
+        this.id = id;
     }
 
     public String getName() {

@@ -1,9 +1,6 @@
 package com.driver.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class Reservation {
@@ -13,9 +10,19 @@ public class Reservation {
 
     private int numberOfHours;
 
+    @ManyToOne
+    @JoinColumn
     private User user;
+
+    @OneToOne(mappedBy = "reservation",cascade = CascadeType.ALL)
     private Payment payment;
+
+    @ManyToOne
+    @JoinColumn
     private Spot spot;
+
+    public Reservation() {
+    }
 
     public int getId() {
         return id;

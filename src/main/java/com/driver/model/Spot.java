@@ -1,9 +1,8 @@
 package com.driver.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import org.hibernate.type.descriptor.sql.TinyIntTypeDescriptor;
+
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -12,12 +11,29 @@ public class Spot {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    private String spotType;
-    private int pricerPerHour;
+    @Enumerated(value = EnumType.STRING)
+    private SpotType spotType;
+
+    private int pricePerHour;
+
+    @Column(columnDefinition = "TINYINT(1)")
     private boolean occupied;
 
-    ParkingLot parkingLot;
-    List<Reservation> reservationList;
+    @ManyToOne
+    @JoinColumn
+    private ParkingLot parkingLot;
+
+    @OneToMany(mappedBy = "spot",cascade = CascadeType.ALL)
+    private List<Reservation> reservationList;
+
+    public Spot(SpotType spotType, int pricePerHour, boolean occupied) {
+        this.spotType = spotType;
+        this.pricePerHour = pricePerHour;
+        this.occupied = occupied;
+    }
+
+    public Spot() {
+    }
 
     public int getId() {
         return id;
@@ -27,20 +43,20 @@ public class Spot {
         this.id = id;
     }
 
-    public String getSpotType() {
+    public SpotType getSpotType() {
         return spotType;
     }
 
-    public void setSpotType(String spotType) {
+    public void setSpotType(SpotType spotType) {
         this.spotType = spotType;
     }
 
-    public int getPricerPerHour() {
-        return pricerPerHour;
+    public int getPricePerHour() {
+        return pricePerHour;
     }
 
-    public void setPricerPerHour(int pricerPerHour) {
-        this.pricerPerHour = pricerPerHour;
+    public void setPricePerHour(int pricePerHour) {
+        this.pricePerHour = pricePerHour;
     }
 
     public boolean isOccupied() {
