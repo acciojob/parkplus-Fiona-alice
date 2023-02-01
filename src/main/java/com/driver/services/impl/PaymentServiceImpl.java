@@ -17,43 +17,36 @@ public class PaymentServiceImpl implements PaymentService {
     ReservationRepository reservationRepository2;
     @Autowired
     PaymentRepository paymentRepository2;
-    @Autowired
-    private ParkingLotRepository parkingLotRepository;
 
     @Override
     public Payment pay(Integer reservationId, int amountSent, String mode) throws Exception {
+        PaymentMode paymentMode;
+        Reservation reservation = reservationRepository2.findById(reservationId).get();
+        reservation.getSpot().setOccupied(false);
 
-        //Attempt a payment of amountSent for reservationId using the given mode ("cASh", "card", or "upi")
-        //If the amountSent is less than bill, throw "Insufficient Amount" exception, otherwise update payment attributes
-        //If the mode contains a string other than "cash", "card", or "upi" (any character in uppercase or lowercase), throw "Payment mode not detected" exception.
-        //Note that the reservationId always exists
-
-        Reservation reservation=reservationRepository2.findById(reservationId).get();
-        Spot spot=reservation.getSpot();
-        int amount=spot.getPricePerHour()*reservation.getNumberOfHours();
-        if(amountSent<amount){
-            throw new Exception("Insufficient Amount");
-
+        if(mode.equalsIgnoreCase("cash")){
+            paymentMode=PaymentMode.CASH;
         }
-
-        Payment payment=new Payment();
-
-        String Mode=mode.toUpperCase();
-
-        if(Mode.equals("CASH")){
-            payment.setPaymentMode(PaymentMode.CASH);
-        } else if (Mode.equals("CARD")) {
-            payment.setPaymentMode(PaymentMode.CARD);
-        } else if (Mode.equals("UPI")) {
-            payment.setPaymentMode(PaymentMode.UPI);
-        }else{
-            payment.setPaymentCompleted(false);
+        else if (mode.equalsIgnoreCase("card")) {
+            paymentMode=PaymentMode.CARD;
+        }
+        else if (mode.equalsIgnoreCase("upi")) {
+            paymentMode=PaymentMode.UPI;
+        }
+        else{
             throw new Exception("Payment mode not detected");
         }
 
-        payment.setPaymentCompleted(true);
+        int bill = reservation.getSpot().getPricePerHour()*reservation.getNumberOfHours();
+        if(amountSent<bill){
+            throw new Exception("Insufficient Amount");
+        }
+
+        Payment payment = new Payment(true,paymentMode);
         payment.setReservation(reservation);
         reservation.setPayment(payment);
+
+
         reservationRepository2.save(reservation);
 
         return payment;

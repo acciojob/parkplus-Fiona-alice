@@ -6,17 +6,30 @@ import javax.persistence.*;
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private int id;    //auto or not....no idea
 
-    @Column(columnDefinition =  "TINYINT(1)")
-    private Boolean paymentCompleted;
+    private boolean paymentCompleted;
 
-    @Enumerated(value = EnumType.STRING)
     private PaymentMode paymentMode;
 
     @OneToOne
     @JoinColumn
     private Reservation reservation;
+
+
+    public Payment() {
+    }
+
+    public Payment(boolean paymentCompleted, PaymentMode paymentMode, Reservation reservation) {
+        this.paymentCompleted = paymentCompleted;
+        this.paymentMode = paymentMode;
+        this.reservation = reservation;
+    }
+
+    public Payment(boolean paymentCompleted, PaymentMode paymentMode) {
+        this.paymentCompleted = paymentCompleted;
+        this.paymentMode = paymentMode;
+    }
 
     public int getId() {
         return id;
@@ -26,11 +39,11 @@ public class Payment {
         this.id = id;
     }
 
-    public Boolean isPaymentCompleted() {
+    public boolean isPaymentCompleted() {
         return paymentCompleted;
     }
 
-    public void setPaymentCompleted(Boolean paymentCompleted) {
+    public void setPaymentCompleted(boolean paymentCompleted) {
         this.paymentCompleted = paymentCompleted;
     }
 

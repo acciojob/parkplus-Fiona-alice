@@ -9,6 +9,7 @@ import com.driver.services.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,58 +22,70 @@ public class ReservationServiceImpl implements ReservationService {
     ReservationRepository reservationRepository3;
     @Autowired
     ParkingLotRepository parkingLotRepository3;
+
     @Override
+    public  Reservation reserveSpot(Integer userId, Integer parkingLotId, Integer timeInHours, Integer numberOfWheels) throws Exception {
+        try{
+            ParkingLot parkingLot = parkingLotRepository3.findById(parkingLotId).get();
 
-    public Reservation reserveSpot(Integer userId, Integer parkingLotId, Integer timeInHours, Integer numberOfWheels) throws Exception {
+            User user = userRepository3.findById(userId).get();
 
-        //Reserve a spot in the given parkingLot such that the total price is minimum. Note that the price per hour for each spot is different
-        //Note that the vehicle can only be parked in a spot having a type equal to or larger than given vehicle
-        //If parkingLot is not found, user is not found, or no spot is available, throw "Cannot make reservation" exception.
-
-        ParkingLot parkingLot=parkingLotRepository3.findById(parkingLotId).get();
-        User user=userRepository3.findById(userId).get();
-        if(parkingLot==null || user==null){
-            throw new Exception("Cannot make reservation");
-        }
-
-        Reservation reservation=new Reservation();
-        reservation.setNumberOfHours(timeInHours);
-        reservation.setUser(user);
-//       Fetching Spots-List from ParkingLots
-        List<Spot> spots=parkingLot.getSpotList();
-        double minprice=Double.MAX_VALUE;
-        Spot spotReserve=null;
-
-        for(Spot spot:spots){
-            if(!spot.getOccupied() && numberOfWheels==2 && spot.getSpotType()==SpotType.TWO_WHEELER && spot.getPricePerHour()<minprice){
-                minprice=spot.getPricePerHour();
-                spotReserve=spot;
-                spot.setOccupied(true);
-                break;
-            } else if (!spot.getOccupied() && numberOfWheels<=4 && spot.getSpotType()==SpotType.FOUR_WHEELER && spot.getPricePerHour()<minprice) {
-                spotReserve=spot;
-                minprice= spot.getPricePerHour();
-                spot.setOccupied(true);
-                break;
-            } else if (!spot.getOccupied() && numberOfWheels!=2 && numberOfWheels!=4 && spot.getSpotType()==SpotType.OTHERS && spot.getPricePerHour()<minprice) {
-                spotReserve=spot;
-                minprice=spot.getPricePerHour();
-                spot.setOccupied(true);
-                break;
+            if(parkingLot==null || user==null){
+                throw new Exception("Cannot make reservation");
             }
+
+            List<Spot> spotList = parkingLot.getSpotList();
+
+            Integer minBill = Integer.MAX_VALUE;
+
+            Spot reqspot=null;
+            for(Spot spot:spotList){
+                if(spotTypeFunction(spot.getSpotType())>=numberOfWheels && spot.getOccupied()==false && spot.getPricePerHour()*timeInHours<minBill){
+                    minBill=spot.getPricePerHour()*timeInHours;
+                    reqspot=spot;
+                }
+            }
+            if (reqspot==null){
+                throw new Exception("Cannot make reservation");
+            }
+
+            Reservation reservation = new Reservation(timeInHours);
+            reservation.setUser(user);
+            List<Reservation> reservationList = user.getReservationList();
+            if(reservationList==null){
+                reservationList = new ArrayList<>();
+            }
+            reservationList.add(reservation);
+            user.setReservationList(reservationList);
+
+
+            reservation.setSpot(reqspot);
+            List<Reservation> reservationList1 = reqspot.getReservationList();
+            if(reservationList1==null){
+                reservationList1 = new ArrayList<>();
+            }
+            reservationList1.add(reservation);
+            reqspot.setReservationList(reservationList1);
+            reqspot.setOccupied(true);
+
+            userRepository3.save(user);
+            spotRepository3.save(reqspot);
+
+            return reservation;
+
+        }catch (Exception e){
+            return null;
         }
-
-        if(spotReserve==null){
-            throw new Exception("Cannot make reservation");
-        }
-
-        reservation.setSpot(spotReserve);
-        user.getReservationList().add(reservation);
-
-        userRepository3.save(user);
-//        reservationRepository3.save(reservation);
-
-
-        return reservation;
     }
+
+    public int spotTypeFunction(SpotType spotType){
+        if (spotType==SpotType.TWO_WHEELER){
+            return 2;
+        }
+        else if (spotType==SpotType.FOUR_WHEELER) {
+            return 4;
+        }
+        else return Integer.MAX_VALUE;
+    }
+
 }
